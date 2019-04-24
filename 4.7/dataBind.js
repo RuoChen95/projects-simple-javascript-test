@@ -3,8 +3,7 @@ function bindData(target, event){
   for(let key in target) {
     // console.log(key)
     if(target.hasOwnProperty(key)) {
-      // console.log(1)
-      {
+      (function(){
         let v = target[key];
         Object.defineProperty(target, key, {
           get: function() {
@@ -15,7 +14,7 @@ function bindData(target, event){
             event.call(this)
           }
         })
-      }
+      })()
     }
   }
 }
