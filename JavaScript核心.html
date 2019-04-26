@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <title>JavaScript语言核心</title>
+  </head>
+  <body>
+    <h1>
+      1
+    </h1>
+    <div>
+
+    </div>
+    <script type="text/javascript">
+      // document.getElementsByTagName('h1').forEach(function(n) {
+      //   n.innerHTML('123')
+      // })
+      document.getElementsByTagName('h1')[0].innerHTML = '123';
+      // setInterval(function() {
+      //   console.log(1)
+      // }, 3000)
+
+      function first() {
+        console.log(arguments)
+      }
+
+      first(document.getElementsByTagName('h1'),2,3,4);
+
+      // 立即执行函数
+      (function() {
+        // 拷贝对象问题
+        let object1 = {
+          a: 1,
+          b: 2.1,
+          c: { // 可以拷贝二级对象
+            d: [1,2,3],
+            e: {
+              f: 4,
+            },
+            g: function() { // 无法拷贝函数，正则，error和undefined值
+              console.log(1)
+            }
+          }
+        };
+
+        object2 = JSON.parse(JSON.stringify(object1));
+        console.log(object2);
+
+        console.log(object1);
+
+        let newObject = {};
+
+        function copy(object1, newObject) {
+          for (all in object1) {
+            if (object1[all] instanceof Array) {
+              newObject[all] = object1[all].slice(0)
+            } else if ((typeof object1[all]) !== "object") {
+              newObject[all] = object1[all]
+            } else {
+              newObject[all] = {};
+              copy(object1[all], newObject[all])
+            }
+          }
+        }
+        copy(object1, newObject);
+        newObject.c.d.push(5);
+
+        console.log(newObject.c.d, object1.c.d)
+      }());
+
+
+      // 判断某个对象的类型
+      console.log([1,2,3] instanceof Array);
+
+
+      // 变量的作用域
+      if (true) {
+        var color1 = "red";
+        let color2 = "blue";
+      }
+      console.log(color1);
+
+
+      // 函数中的this
+      var color = "red";
+      let o = {
+        color: "blue",
+        sayColor1: function(otherPara) {
+          console.log(this.color, otherPara) //引用了函数执行的时候的环境对象
+        },
+        sayColor2: ()=> {
+          console.log(this.color)
+        }
+      };
+      o.sayColor1('green');
+      o.sayColor2();
+      o.sayColor1.call(window, 'green');
+      o.sayColor1.call({
+        color: 'pink'
+      }, 'green');
+
+
+      // 理解对象
+      var book = {
+        _year: 2004,
+        edition: 1,
+      };
+
+      Object.defineProperty(book, "year", {
+        get: function() {
+          return this._year
+        },
+        set: function(newValue) {
+          this._year = newValue;
+          if (newValue > 2004) {
+            this.edition = newValue - 2004
+            document.getElementsByTagName('h1')[0].innerHTML = this.edition
+          }
+        }
+      });
+
+      book.year = 2015;
+      console.log(book.edition);
+
+      console.log(document.getElementsByTagName('h1')[0].__proto__);
+      console.log(document.getElementsByTagName('h1')[0].__proto__.__proto__);
+      // console.log(Object.keys(document.getElementsByTagName('h1')[0].__proto__.__proto__))
+
+      // 通过对于prototype的属性赋值可以直接让其实例直接使用这个原型上的属性和方法
+      String.prototype.name = '123';
+      console.log('123'.name);
+
+      Object.prototype.getHeight = function() {
+        return this.clientHeight
+      };
+
+      console.log(document.getElementsByTagName('h1')[0].getHeight());
+
+
+      //基本函数 + 函数作为命名空间
+      (function(){
+        function test() {
+          console.log(arguments, this)
+        }
+        test.call({foo: 1}, '参数1', '参数2')
+      }());
+
+
+      //闭包
+      (function(){
+        let scope = 'global';
+        let test = 'test';
+        function bibao() {
+          let scope = 'local';
+          function bibaohanshu() {
+            console.log(scope)
+          }
+          return {
+            bibaohanshu: bibaohanshu
+          }
+        }
+        function putong() {
+          let scope = 'local2';
+          console.log(scope)
+        }
+        scope = 'global gaibain';
+        bibao().bibaohanshu();
+        putong();
+
+        function constfuncs() {
+          var funcs = [];
+          for (var i = 0; i < 10; i++) {
+            funcs[i] = function() {return i;};
+          }
+          return funcs;
+        }
+        var funcs = constfuncs();
+        console.log(funcs[5]());
+      }());
+
+
+      // 函数式编程1
+      (function(){
+        let map2 = function(a, f) {
+          let results = [];
+          for (let i = 0; i < a.length; i++) {
+            results[i] = f(a[i], i, a);
+          }
+          return results;
+        };
+
+        console.log(map2([1,2,3], function(elements) {
+          return elements + 1
+        }))
+
+      }());
+
+
+
+      // 子类继承：原型模式
+      (function(){
+        function SuperType() {
+          this.property = true;
+        }
+        SuperType.prototype.getSuperValue = function() {
+          return this.property
+        };
+
+        function childType() {
+          this.property = false;
+        }
+        childType.prototype = new SuperType();
+        childType.prototype.getSuperValue = function() { // 需要先绑定后再增加方法
+          return this.property
+        };
+
+        let foo = new childType;
+        console.log(
+          foo.getSuperValue(),
+          foo instanceof childType,
+          foo instanceof SuperType,
+          foo.__proto__);
+      }());
+
+      // 子类继承：构造函数模式
+      (function(){
+        function SuperType(name) {
+          this.name = name;
+        }
+        function childType(name) {
+          SuperType.call(this, name);
+        }
+        let instance = new childType('Bob');
+        console.log(
+          instance.name,
+          instance instanceof childType,
+          instance instanceof SuperType,
+          instance.__proto__);
+      }());
+    </script>
+  </body>
+</html>

@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>客户端JavaScript</title>
+  </head>
+  <body>
+    <div id="foo">
+      <h1>
+        1
+      </h1>
+      <div>
+        <p>2</p>
+        <div>
+          5
+          <p>3</p>
+          <p>4</p>
+          6
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+      (function(){
+        let arr = [];
+
+        function getNodes(a) {
+          if (typeof a.childNodes !== 'undefined') {
+            a.childNodes.forEach(function(n) {
+              if (n.nodeType == 1) {
+                arr.push(n.tagName);
+                getNodes(n)
+              }
+            })
+          }
+        }
+
+        getNodes(document.getElementById('foo'));
+        console.log(arr)
+      }());
+    </script>
+  </body>
+</html>
