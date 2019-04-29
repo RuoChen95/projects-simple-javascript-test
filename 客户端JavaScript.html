@@ -1,6 +1,12 @@
 <html>
   <head>
     <title>客户端JavaScript</title>
+    <style>
+      #foo-results * {
+        padding: 10px;
+        border: 1px solid black;
+      }
+    </style>
   </head>
   <body>
     <div id="foo">
@@ -17,23 +23,80 @@
         </div>
       </div>
     </div>
+
+    <div id="foo-results">
+
+    </div>
     <script type="text/javascript">
+      /*
+      [
+      {
+        tagName: 'h1',
+        childName: []
+      },
+      {
+        tagName: 'div',
+        childName: [
+          {
+            tagName: 'p',
+            childName: []
+          },
+          {
+            tagName: 'div',
+            childName: [
+              {
+                //..
+              }
+            ]
+          }
+        ]
+      }
+      ]
+       */
+
       (function(){
         let arr = [];
+        arr.childName = [];
+        arr.tagName = document.getElementById('foo').tagName;
 
-        function getNodes(a) {
+        function getNodes(a, child) {
           if (typeof a.childNodes !== 'undefined') {
+            let i = -1;
             a.childNodes.forEach(function(n) {
               if (n.nodeType == 1) {
-                arr.push(n.tagName);
-                getNodes(n)
+                i++;
+                child.push({
+                  tagName: n.tagName,
+                  childName: []
+                });
+
+                getNodes(n, child[i].childName)
               }
             })
           }
         }
 
-        getNodes(document.getElementById('foo'));
-        console.log(arr)
+        getNodes(document.getElementById('foo'), arr.childName);
+
+        let r = document.getElementById('foo-results');
+
+        console.log(arr);
+
+        function append(arr, r) {
+          let i = 0;
+          arr.childName.forEach(function(n) {
+            let dom = document.createElement('div');
+            dom.innerText = n.tagName;
+            r.appendChild(dom);
+
+            i++;
+            if (n.childName && n.childName.length >= 1) {
+              append(n, r.childNodes[i])
+            }
+          })
+        }
+
+        append(arr, r)
       }());
     </script>
   </body>
